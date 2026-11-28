@@ -1,8 +1,10 @@
 import "dotenv/config";
 import app from "./app.js";
 import connectDB from "./config/db.js";
+import validateEnv from "./config/validateEnv.js";
 
 try {
+  validateEnv();
   await connectDB();
   app.listen(process.env.PORT, (err) => {
     if (err) {

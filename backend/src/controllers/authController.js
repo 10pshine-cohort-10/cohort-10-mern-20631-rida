@@ -20,16 +20,21 @@ export const signup = async (req, res) => {
         .status(400)
         .json({ message: "Password must be at least 6 characters" });
     }
+    if (Buffer.byteLength(password, "utf8") > 72) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at most 72 bytes" });
+    }
 
     const exists = await User.findOne({ email: email.toLowerCase() });
     if (exists) {
       return res.status(409).json({ message: "Email already registered" });
     }
 
-    const user = await User.create({ name, email, password });
-    res
-      .status(201)
-      .json({ user: userResponse(user), token: generateToken(user._id) });
+    const user = new User({ name, email, password });
+    const token = generateToken(user._id);
+    await user.save();
+    res.status(201).json({ user: userResponse(user), token });
   } catch (err) {
     console.error("Signup error:", err);
     res.status(500).json({ message: "Server error" });
